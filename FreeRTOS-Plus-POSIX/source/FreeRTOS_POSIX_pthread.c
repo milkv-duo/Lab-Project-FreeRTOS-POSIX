@@ -262,6 +262,18 @@ int pthread_attr_setschedpolicy( pthread_attr_t * attr,
 
 /*-----------------------------------------------------------*/
 
+int pthread_attr_setinheritsched( pthread_attr_t *attr,
+								int inheritsched)
+{
+    /* Silence warnings about unused parameters. */
+    ( void ) attr;
+    ( void ) inheritsched;
+
+    return 0;
+}
+
+/*-----------------------------------------------------------*/
+
 int pthread_attr_setstacksize( pthread_attr_t * attr,
                                size_t stacksize )
 {
@@ -363,6 +375,27 @@ int pthread_create( pthread_t * thread,
     }
 
     return iStatus;
+}
+
+
+int pthread_setname_np(pthread_t thread, const char *name)
+{
+	pthread_internal_t * pxThread = NULL;
+	TaskHandle_t task_t;
+	int len;
+	int ret = EINVAL;
+
+	if ((len = strnlen(name, 16)) > 15)
+		return ERANGE;
+	vTaskSuspendAll();
+	pxThread = thread;
+	task_t = pxThread->xTaskHandle;
+	if (task_t && name) {
+		pcTaskSetName(task_t, name);
+		ret = 0;
+	}
+	xTaskResumeAll();
+	return ret;
 }
 
 /*-----------------------------------------------------------*/

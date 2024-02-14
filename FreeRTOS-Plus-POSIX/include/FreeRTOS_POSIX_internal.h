@@ -105,7 +105,7 @@
 /**
  * @brief Semaphore type.
  */
-    typedef struct
+    typedef struct sem_internal
     {
         StaticSemaphore_t xSemaphore; /**< FreeRTOS semaphore. */
         int value;                    /**< POSIX semaphore count. */

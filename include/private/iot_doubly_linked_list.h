@@ -79,8 +79,10 @@
 #define _AWS_DOUBLY_LINKED_LIST_H_
 
 #include <stddef.h>
+#ifdef __BUILD_RTOS_KERNEL__
 #include <stdint.h>
 
+#endif
 /**
  * @brief Struct embedded in any struct to make it a doubly linked
  * list.

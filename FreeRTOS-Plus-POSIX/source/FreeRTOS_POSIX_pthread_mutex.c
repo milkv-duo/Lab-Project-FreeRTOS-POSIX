@@ -370,4 +370,69 @@ int pthread_mutexattr_settype( pthread_mutexattr_t * attr,
     return iStatus;
 }
 
+static __always_inline int
+futex_supports_pshared (int pshared)
+{
+	if (pshared == PTHREAD_PROCESS_PRIVATE)
+		return 0;
+	else if (pshared == PTHREAD_PROCESS_SHARED)
+		return 0;
+	else
+		return EINVAL;
+}
+
+int
+pthread_mutexattr_setpshared (pthread_mutexattr_t *attr, int pshared)
+{
+	pthread_mutexattr_internal_t *iattr;
+	int err = futex_supports_pshared (pshared);
+	if (err != 0)
+		return err;
+	iattr = (pthread_mutexattr_internal_t *) attr;
+	if (pshared == PTHREAD_PROCESS_PRIVATE)
+		iattr->iType &= ~PTHREAD_MUTEXATTR_FLAG_PSHARED;
+	else
+		iattr->iType |= PTHREAD_MUTEXATTR_FLAG_PSHARED;
+	return 0;
+}
+
+int
+pthread_mutexattr_getpshared (const pthread_mutexattr_t *attr, int *pshared)
+{
+	const pthread_mutexattr_internal_t *iattr;
+	iattr = (const pthread_mutexattr_internal_t *) attr;
+	*pshared = ((iattr->iType & PTHREAD_MUTEXATTR_FLAG_PSHARED) != 0
+		? PTHREAD_PROCESS_SHARED : PTHREAD_PROCESS_PRIVATE);
+	return 0;
+}
+
+int
+pthread_mutexattr_setrobust (pthread_mutexattr_t *attr, int robustness)
+{
+	if (robustness != PTHREAD_MUTEX_STALLED_NP
+  		&& __builtin_expect (robustness != PTHREAD_MUTEX_ROBUST_NP, 0))
+		return EINVAL;
+	pthread_mutexattr_internal_t *iattr = (pthread_mutexattr_internal_t *) attr;
+	/* We use bit 30 to signal whether the mutex is going to be
+	 *robust or not.
+	 */
+	if (robustness == PTHREAD_MUTEX_STALLED_NP)
+		iattr->iType &= ~PTHREAD_MUTEXATTR_FLAG_ROBUST;
+	else
+		iattr->iType |= PTHREAD_MUTEXATTR_FLAG_ROBUST;
+	return 0;
+}
+#define pthread_mutexattr_setrobust_np pthread_mutexattr_setrobust
+
+int
+pthread_mutexattr_getrobust (const pthread_mutexattr_t *attr, int *robustness)
+{
+	const pthread_mutexattr_internal_t *iattr;
+	iattr = (const pthread_mutexattr_internal_t *) attr;
+	*robustness = ((iattr->iType & PTHREAD_MUTEXATTR_FLAG_ROBUST) != 0
+		? PTHREAD_MUTEX_ROBUST_NP : PTHREAD_MUTEX_STALLED_NP);
+	return 0;
+}
+#define pthread_mutexattr_getrobust_np pthread_mutexattr_getrobust
+
 /*-----------------------------------------------------------*/

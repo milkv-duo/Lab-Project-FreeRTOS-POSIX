@@ -38,9 +38,12 @@ extern "C" {
 #endif
 
 /* C standard library includes. */
+#ifdef __BUILD_RTOS_KERNEL__
 #include <stdint.h>
 
+#endif
 /* FreeRTOS types include */
+#include "FreeRTOS_POSIX.h"
 #include "FreeRTOS_POSIX_types.h"
 
 /**

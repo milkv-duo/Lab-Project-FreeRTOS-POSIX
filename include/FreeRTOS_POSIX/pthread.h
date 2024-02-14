@@ -75,6 +75,37 @@ extern "C" {
 #ifndef PTHREAD_MUTEX_DEFAULT
     #define PTHREAD_MUTEX_DEFAULT       PTHREAD_MUTEX_NORMAL     /**< PTHREAD_MUTEX_NORMAL (default). */
 #endif
+
+#define PTHREAD_MUTEXATTR_FLAG_ROBUST                 0x40000000
+#define PTHREAD_MUTEXATTR_FLAG_PSHARED                0x80000000
+
+/* Process shared or private flag.  */
+enum
+{
+  PTHREAD_PROCESS_PRIVATE,
+#define PTHREAD_PROCESS_PRIVATE PTHREAD_PROCESS_PRIVATE
+  PTHREAD_PROCESS_SHARED
+#define PTHREAD_PROCESS_SHARED  PTHREAD_PROCESS_SHARED
+};
+
+/* Robust mutex or not flags.  */
+enum
+{
+  PTHREAD_MUTEX_STALLED,
+  PTHREAD_MUTEX_STALLED_NP = PTHREAD_MUTEX_STALLED,
+  PTHREAD_MUTEX_ROBUST,
+  PTHREAD_MUTEX_ROBUST_NP = PTHREAD_MUTEX_ROBUST
+};
+
+/* Scheduler inheritance.  */
+enum
+{
+  PTHREAD_INHERIT_SCHED,
+#define PTHREAD_INHERIT_SCHED   PTHREAD_INHERIT_SCHED
+  PTHREAD_EXPLICIT_SCHED
+#define PTHREAD_EXPLICIT_SCHED  PTHREAD_EXPLICIT_SCHED
+};
+
 /**@} */
 
 /**
@@ -184,6 +215,10 @@ int pthread_attr_setschedparam( pthread_attr_t * attr,
 int pthread_attr_setschedpolicy( pthread_attr_t * attr,
                                  int policy );
 
+
+int pthread_attr_setinheritsched(pthread_attr_t *attr,
+								int inheritsched);
+
 /**
  * @brief Set stacksize attribute.
  *
@@ -250,6 +285,8 @@ int pthread_create( pthread_t * thread,
                     void *( *startroutine )( void * ),
                     void * arg );
 
+
+int pthread_setname_np(pthread_t thread, const char *name);
 /**
  * @brief Broadcast a condition.
  *
